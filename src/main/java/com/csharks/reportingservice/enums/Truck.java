@@ -3,6 +3,9 @@ package com.csharks.reportingservice.enums;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public enum Truck {
     HYBRID, FLATBED, BOX;
 
@@ -20,6 +23,13 @@ public enum Truck {
             default:
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid product input. Please, try again.");
         }
+    }
+
+    public static List<Truck> createProductList() {
+        List<Truck> products = new ArrayList<Truck>((List.of(
+                HYBRID,FLATBED,BOX
+        )));
+        return products;
     }
 
 }
