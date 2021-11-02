@@ -2,6 +2,8 @@ package com.csharks.reportingservice.proxy;
 
 import com.csharks.reportingservice.dao.Opportunity;
 import com.csharks.reportingservice.dto.receiving.OpportunityDTO;
+import com.csharks.reportingservice.enums.Countries;
+import com.csharks.reportingservice.enums.Industry;
 import com.csharks.reportingservice.enums.Status;
 import com.csharks.reportingservice.enums.Truck;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -46,10 +48,39 @@ public interface OpportunityServiceProxy {
     public Long countOppsByProductAndStatus(@RequestParam Truck product, @RequestParam Status status);
 
     @GetMapping("/location/country/{country}")
-    public Long countOppsByCountry(@PathVariable(name = "country") String country);
+    public Long countOppsByCountry(@PathVariable(name = "country") Countries country);
 
     @GetMapping("/location/country")
-    public Long countOppsByCountryAndStatus(@RequestParam String country, @RequestParam Status status);
+    public Long countOppsByCountryAndStatus(@RequestParam Countries country, @RequestParam Status status);
 
+    @GetMapping("/industry/{industry}")
+    public Long countOppsByIndustry(@PathVariable(name = "industry") Industry industry);
+
+    @GetMapping("/industry")
+    public Long countOppsByIndustryAndStatus(@RequestParam Industry industry, @RequestParam Status status);
+
+    @GetMapping("/product/mean")
+    public Double findMeanProductQuantity();
+
+    @GetMapping("/product/max")
+    public Long findMaxProductQuantity();
+
+    @GetMapping("/product/min")
+    public Long findMinProductQuantity();
+
+    @GetMapping("/product/median")
+    public Long findMedianProductQuantity();
+
+    @GetMapping("/mean/{accountId}")
+    public Double findMeanOppsByAccount(@PathVariable(name = "accountId") Long id);
+
+    @GetMapping("/max/{accountId}")
+    public Long findMaxOppsByAccount(@PathVariable(name = "accountId") Long id);
+
+    @GetMapping("/min/{accountId}")
+    public Long findMinOppsByAccount(@PathVariable(name = "accountId") Long id);
+
+    @GetMapping("/median/{accountId}")
+    public Long findMedianOppsByAccount(@PathVariable(name = "accountId") Long id);
 
 }

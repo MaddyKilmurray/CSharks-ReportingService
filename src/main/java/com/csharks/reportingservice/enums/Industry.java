@@ -3,6 +3,10 @@ package com.csharks.reportingservice.enums;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+
 public enum Industry {
     PRODUCE, ECOMMERCE, MEDICAL, OTHER, MANUFACTURING;
 
@@ -24,5 +28,10 @@ public enum Industry {
             default:
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid industry input. Please, try again.");
         }
+    }
+
+    public static List<Industry> createIndustryList() {
+        List<Industry> industries = new ArrayList<Industry>(EnumSet.allOf(Industry.class));
+        return industries;
     }
 }

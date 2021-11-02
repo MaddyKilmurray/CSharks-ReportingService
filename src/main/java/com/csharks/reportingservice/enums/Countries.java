@@ -1,5 +1,9 @@
 package com.csharks.reportingservice.enums;
 
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+
 public enum Countries {
     ANDORRA("ANDORRA"), UNITEDARABEMIRATES("UNITED ARAB EMIRATES"), AFGHANISTAN("AFGHANISTAN"), ANTIGUABARBUDA("ANTIGUA & BARBUDA"), ANGUILLA("ANGUILLA"),
     ALBANIA("ALBANIA"), ARMENIA("ARMENIA"), ANGOLA("ANGOLA"), ANTARCTICA("ANTARCTICA"), ARGENTINA("ARGENTINA"), AMERICANSAMOA("AMERICAN SAMOA"), AUSTRIA("AUSTRIA"),
@@ -46,5 +50,10 @@ public enum Countries {
                 return country;
         }
         return Countries.NONE;
+    }
+
+    public static List<Countries> createCountryList() {
+        List<Countries> countries = new ArrayList<Countries>(EnumSet.allOf(Countries.class));
+        return countries;
     }
 }

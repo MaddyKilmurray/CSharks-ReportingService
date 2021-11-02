@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 
 public enum Truck {
@@ -26,9 +27,7 @@ public enum Truck {
     }
 
     public static List<Truck> createProductList() {
-        List<Truck> products = new ArrayList<Truck>((List.of(
-                HYBRID,FLATBED,BOX
-        )));
+        List<Truck> products = new ArrayList<Truck>(EnumSet.allOf(Truck.class));
         return products;
     }
 

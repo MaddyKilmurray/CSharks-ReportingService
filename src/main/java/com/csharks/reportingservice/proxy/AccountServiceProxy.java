@@ -8,16 +8,29 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @FeignClient("ACCOUNT-SERVICE")
+@RequestMapping("/accounts")
 public interface AccountServiceProxy {
-    @GetMapping("/accounts")
+    @GetMapping
     public List<Account> findAll();
 
-    @GetMapping("/accounts/{id}")
+    @GetMapping("/{id}")
     public AccountDTO findById(@PathVariable(name = "id") Long id);
 
-    @PostMapping("/accounts")
+    @PostMapping
     public AccountDTO create(@RequestBody AccountDTO accountDTO);
 
-    @DeleteMapping("/accounts/{id}")
+    @DeleteMapping("/{id}")
     public void remove(@PathVariable(name = "id") Long id);
+
+    @GetMapping("/mean")
+    public Double findMeanEmployeeCount();
+
+    @GetMapping("/max")
+    public Long findMaxEmployeeCount();
+
+    @GetMapping("/min")
+    public Long findMinEmployeeCount();
+
+    @GetMapping("/median")
+    public Long findMedianEmployeeCount();
 }
