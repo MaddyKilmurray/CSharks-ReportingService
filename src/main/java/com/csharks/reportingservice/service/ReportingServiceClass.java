@@ -72,13 +72,13 @@ public class ReportingServiceClass{
         List<Truck> products = Truck.createProductList();
         if (dataType.toUpperCase().equals("ALL")) {
             for (Truck product : products) {
-                salesRepReport.add(new ReportDTO(product.name(),countOppsByProduct(product)));
+                salesRepReport.add(new ReportDTO(product.name(),countOppsByProduct(product.toString())));
             }
         }
         else if (dataType.toUpperCase().equals("CLOSED_WON") || dataType.toUpperCase().equals("CLOSED_LOST") ||
         dataType.toUpperCase().equals("OPEN")) {
             for (Truck product : products) {
-                salesRepReport.add(new ReportDTO(product.name(), countOppsByProductAndStatus(product,Status.valueOf(dataType))));
+                salesRepReport.add(new ReportDTO(product.name(), countOppsByProductAndStatus(product.toString(),Status.valueOf(dataType))));
             }
         }
         return salesRepReport;
@@ -90,17 +90,23 @@ public class ReportingServiceClass{
         List<Countries> countries = Countries.createCountryList();
         if (dataType.toUpperCase().equals("ALL")) {
             for (Countries country : countries) {
-                salesRepReport.add(new ReportDTO(country.name(), countOppsByCountry(country)));
+                salesRepReport.add(new ReportDTO(country.name(), countOppsByCountry(country.toString())));
             }
         }
         else if (dataType.toUpperCase().equals("CLOSED_WON") || dataType.toUpperCase().equals("CLOSED_LOST") ||
                 dataType.toUpperCase().equals("OPEN")) {
             for (Countries country : countries) {
-                salesRepReport.add(new ReportDTO(country.name(), countOppsByCountryAndStatus(country,Status.valueOf(dataType))));
+                salesRepReport.add(new ReportDTO(country.name(), countOppsByCountryAndStatus(country.toString(),Status.valueOf(dataType))));
             }
         }
         return salesRepReport;
     }
+
+//    public List<ReportDTO> reportByCity(String dataType) {
+//        List<String> cities = accountServiceProxy.getCityList();
+//        List<ReportDTO> salesRepReport = new ArrayList<>();
+//
+//    }
 
     public List<ReportDTO> reportByIndustry(String dataType) {
         List<SalesRep> salesReps = getAllSalesReps();
@@ -108,13 +114,13 @@ public class ReportingServiceClass{
         List<Industry> industries = Industry.createIndustryList();
         if (dataType.toUpperCase().equals("ALL")) {
             for (Industry industry : industries) {
-                salesRepReport.add(new ReportDTO(industry.name(), countOppsByIndustry(industry)));
+                salesRepReport.add(new ReportDTO(industry.name(), countOppsByIndustry(industry.toString())));
             }
         }
         else if (dataType.toUpperCase().equals("CLOSED_WON") || dataType.toUpperCase().equals("CLOSED_LOST") ||
                 dataType.toUpperCase().equals("OPEN")) {
             for (Industry industry : industries) {
-                salesRepReport.add(new ReportDTO(industry.name(), countOppsByIndustryAndStatus(industry,Status.valueOf(dataType))));
+                salesRepReport.add(new ReportDTO(industry.name(), countOppsByIndustryAndStatus(industry.toString(),Status.valueOf(dataType))));
             }
         }
         return salesRepReport;
@@ -178,37 +184,37 @@ public class ReportingServiceClass{
                 throwable -> getAccountListFallback());
     }
 
-    public Long countOppsByProduct(Truck product) {
+    public Long countOppsByProduct(String product) {
         CircuitBreaker circuitBreaker = createCircuitBreaker();
         return circuitBreaker.run(() -> opportunityServiceProxy.countOppsByProduct(product),
                 throwable -> null);
     }
 
-    public Long countOppsByProductAndStatus(Truck product, Status status) {
+    public Long countOppsByProductAndStatus(String product, Status status) {
         CircuitBreaker circuitBreaker = createCircuitBreaker();
         return circuitBreaker.run(() -> opportunityServiceProxy.countOppsByProductAndStatus(product,status),
                 throwable -> null);
     }
 
-    public Long countOppsByCountry(Countries country) {
+    public Long countOppsByCountry(String country) {
         CircuitBreaker circuitBreaker = createCircuitBreaker();
         return circuitBreaker.run(() -> opportunityServiceProxy.countOppsByCountry(country),
                 throwable -> null);
     }
 
-    public Long countOppsByCountryAndStatus(Countries country, Status status) {
+    public Long countOppsByCountryAndStatus(String country, Status status) {
         CircuitBreaker circuitBreaker = createCircuitBreaker();
         return circuitBreaker.run(() -> opportunityServiceProxy.countOppsByCountryAndStatus(country,status),
                 throwable -> null);
     }
 
-    public Long countOppsByIndustry(Industry industry) {
+    public Long countOppsByIndustry(String industry) {
         CircuitBreaker circuitBreaker = createCircuitBreaker();
         return circuitBreaker.run(() -> opportunityServiceProxy.countOppsByIndustry(industry),
                 throwable -> null);
     }
 
-    public Long countOppsByIndustryAndStatus(Industry industry, Status status) {
+    public Long countOppsByIndustryAndStatus(String industry, Status status) {
         CircuitBreaker circuitBreaker = createCircuitBreaker();
         return circuitBreaker.run(() -> opportunityServiceProxy.countOppsByIndustryAndStatus(industry,status),
                 throwable -> null);

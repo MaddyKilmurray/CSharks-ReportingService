@@ -2,6 +2,7 @@ package com.csharks.reportingservice.proxy;
 
 import com.csharks.reportingservice.dao.Account;
 import com.csharks.reportingservice.dto.receiving.AccountDTO;
+import com.csharks.reportingservice.enums.Countries;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,4 +34,16 @@ public interface AccountServiceProxy {
 
     @GetMapping("/median")
     public Long findMedianEmployeeCount();
+
+    @GetMapping("/industry/{industry}")
+    public List<Long> listIdByIndustry(@PathVariable String industry);
+
+    @GetMapping("/country/{country}")
+    public List<Long> listIdByCountry(@PathVariable Countries country);
+
+    @GetMapping("/city")
+    public List<String> getCityList();
+
+    @GetMapping("/city/{id}")
+    public String getCityById(@PathVariable(name = "id") Long id);
 }

@@ -42,22 +42,22 @@ public interface OpportunityServiceProxy {
     public List<Opportunity> getBySalesRepIdAndStatus(@PathVariable Long id,@RequestBody String status);
 
     @GetMapping("/product/{product}")
-    public Long countOppsByProduct(@PathVariable(name = "product") Truck product);
+    public Long countOppsByProduct(@PathVariable(name = "product") String product);
 
     @GetMapping("/product")
-    public Long countOppsByProductAndStatus(@RequestParam Truck product, @RequestParam Status status);
+    public Long countOppsByProductAndStatus(@RequestParam String product, @RequestParam Status status);
 
     @GetMapping("/location/country/{country}")
-    public Long countOppsByCountry(@PathVariable(name = "country") Countries country);
+    public Long countOppsByCountry(@PathVariable(name = "country") String country);
 
     @GetMapping("/location/country")
-    public Long countOppsByCountryAndStatus(@RequestParam Countries country, @RequestParam Status status);
+    public Long countOppsByCountryAndStatus(@RequestParam String country, @RequestParam Status status);
 
     @GetMapping("/industry/{industry}")
-    public Long countOppsByIndustry(@PathVariable(name = "industry") Industry industry);
+    public Long countOppsByIndustry(@PathVariable(name = "industry") String industry);
 
     @GetMapping("/industry")
-    public Long countOppsByIndustryAndStatus(@RequestParam Industry industry, @RequestParam Status status);
+    public Long countOppsByIndustryAndStatus(@RequestParam String industry, @RequestParam Status status);
 
     @GetMapping("/product/mean")
     public Double findMeanProductQuantity();
