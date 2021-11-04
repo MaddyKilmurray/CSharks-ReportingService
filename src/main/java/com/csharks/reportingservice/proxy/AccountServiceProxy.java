@@ -12,7 +12,7 @@ import java.util.List;
 @RequestMapping("/accounts")
 public interface AccountServiceProxy {
     @GetMapping
-    public List<Account> findAll();
+    public List<AccountDTO> findAll();
 
     @GetMapping("/{id}")
     public AccountDTO findById(@PathVariable(name = "id") Long id);
