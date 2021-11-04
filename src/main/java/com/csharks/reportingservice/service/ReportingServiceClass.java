@@ -18,8 +18,10 @@ import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ReportingServiceClass {
@@ -54,15 +56,13 @@ public class ReportingServiceClass {
                         leadCount.getSalesRepId().toString();
                 salesRepReport.add(new ReportDTO(salesRepNameByLeadCountId, leadCount.getLeadCount()));
             }
-        }
-        else if (dataType.equalsIgnoreCase("OPPORTUNITY")) {
+        } else if (dataType.equalsIgnoreCase("OPPORTUNITY")) {
             for (SalesRep sales : salesReps) {
                 int count = getBySalesRepId(sales.getId()).size();
                 ReportDTO newReport = new ReportDTO(sales.getRepName(), Long.valueOf(count));
                 salesRepReport.add(newReport);
             }
-        }
-        else if ((dataType.replace("-", "_").replace(" ", "-").equalsIgnoreCase("CLOSED_WON")) ||
+        } else if ((dataType.replace("-", "_").replace(" ", "-").equalsIgnoreCase("CLOSED_WON")) ||
                 (dataType.replace("-", "_").replace(" ", "-").equalsIgnoreCase("CLOSED_LOST"))) {
             for (SalesRep sales : salesReps) {
                 String formattedDataType = dataType.replace(" ", "_").replace("-", "_").toUpperCase();
@@ -74,7 +74,6 @@ public class ReportingServiceClass {
     }
 
     public List<ReportDTO> reportByProduct(String dataType) {
-        List<SalesRep> salesReps = getAllSalesReps();
         List<ReportDTO> salesRepReport = new ArrayList<>();
         List<Truck> products = Truck.createProductList();
         if (dataType.equalsIgnoreCase("ALL")) {
@@ -93,20 +92,24 @@ public class ReportingServiceClass {
     }
 
     public List<ReportDTO> reportByCountry(String dataType) {
-        List<SalesRep> salesReps = getAllSalesReps();
         List<ReportDTO> salesRepReport = new ArrayList<>();
         List<Countries> countries = Countries.createCountryList();
-        if (dataType.toUpperCase().equals("ALL")) {
+        if (dataType.equalsIgnoreCase("ALL")) {
             for (Countries country : countries) {
                 salesRepReport.add(new ReportDTO(country.name(), countOppsByCountry(country.toString())));
             }
-        } else if (dataType.toUpperCase().equals("CLOSED_WON") || dataType.toUpperCase().equals("CLOSED_LOST") ||
-                dataType.toUpperCase().equals("OPEN")) {
+        } else if ((dataType.replace("-", "_").replace(" ", "-").equalsIgnoreCase("CLOSED_WON")) ||
+                (dataType.replace("-", "_").replace(" ", "-").equalsIgnoreCase("CLOSED_LOST")) ||
+                dataType.equalsIgnoreCase("OPEN")) {
+            String formattedDataType = dataType.replace(" ", "_").replace("-", "_").toUpperCase();
             for (Countries country : countries) {
-                salesRepReport.add(new ReportDTO(country.name(), countOppsByCountryAndStatus(country.toString(), Status.valueOf(dataType))));
+                salesRepReport.add(new ReportDTO(country.name(), countOppsByCountryAndStatus(country.toString(), Status.valueOf(formattedDataType))));
             }
         }
-        return salesRepReport;
+        return salesRepReport.stream()
+                .sorted(Comparator.comparing(reportDTO -> reportDTO.getCount(), Comparator.reverseOrder()))
+                .collect(Collectors.toList());
+//        return salesRepReport;
     }
 
 //    public List<ReportDTO> reportByCity(String dataType) {
