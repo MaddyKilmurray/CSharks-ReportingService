@@ -1,10 +1,9 @@
 package com.csharks.reportingservice.service;
 
-import com.csharks.reportingservice.dao.Account;
 import com.csharks.reportingservice.dao.Opportunity;
 import com.csharks.reportingservice.dao.SalesRep;
+import com.csharks.reportingservice.dto.receiving.AccountDTO;
 import com.csharks.reportingservice.dto.receiving.LeadCountBySalesRepDTO;
-import com.csharks.reportingservice.dto.receiving.LeadDTO;
 import com.csharks.reportingservice.dto.report.ReportDTO;
 import com.csharks.reportingservice.enums.Countries;
 import com.csharks.reportingservice.enums.Industry;
@@ -17,13 +16,15 @@ import com.csharks.reportingservice.proxy.SalesRepServiceProxy;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
-public class ReportingServiceClass{
+public class ReportingServiceClass {
 
     final LeadServiceProxy leadServiceProxy;
     final AccountServiceProxy accountServiceProxy;
@@ -43,84 +44,108 @@ public class ReportingServiceClass{
     public List<ReportDTO> reportBySalesRep(String dataType) {
         List<SalesRep> salesReps = getAllSalesReps();
         List<ReportDTO> salesRepReport = new ArrayList<>();
-        if (dataType.toUpperCase().equals("LEAD")) {
+
+        if (dataType.equalsIgnoreCase("LEAD")) {
             List<LeadCountBySalesRepDTO> leads = getCountLeadsBySalesRepId();
             for (LeadCountBySalesRepDTO leadCount : leads) {
-                salesRepReport.add(new ReportDTO(leadCount.getSalesRepId().toString(),leadCount.getLeadCount()));
+                Optional<SalesRep> salesRepByLeadCountId = salesReps.stream()
+                        .filter(salesRep -> salesRep.getId().equals(leadCount.getSalesRepId()))
+                        .findFirst();
+                String salesRepNameByLeadCountId = salesRepByLeadCountId.isPresent() ?
+                        salesRepByLeadCountId.get().getRepName() :
+                        leadCount.getSalesRepId().toString();
+                salesRepReport.add(new ReportDTO(salesRepNameByLeadCountId, leadCount.getLeadCount()));
             }
-        }
-        else if (dataType.toUpperCase().equals("OPPORTUNITY")) {
+        } else if (dataType.equalsIgnoreCase("OPPORTUNITY")) {
             for (SalesRep sales : salesReps) {
                 int count = getBySalesRepId(sales.getId()).size();
-                ReportDTO newReport = new ReportDTO(sales.getRepName(),Long.valueOf(count));
+                ReportDTO newReport = new ReportDTO(sales.getRepName(), Long.valueOf(count));
                 salesRepReport.add(newReport);
             }
-        }
-        else if ((dataType.toUpperCase().equals("CLOSED-WON")) || (dataType.toUpperCase().equals("CLOSED-LOST"))) {
+        } else if ((dataType.replace("-", "_").replace(" ", "-").equalsIgnoreCase("CLOSED_WON")) ||
+                (dataType.replace("-", "_").replace(" ", "-").equalsIgnoreCase("CLOSED_LOST"))) {
             for (SalesRep sales : salesReps) {
-                int count = getBySalesRepIdAndStatus(sales.getId(),dataType).size();
-                ReportDTO newReport = new ReportDTO(sales.getRepName(),Long.valueOf(count));
-                salesRepReport.add(newReport);
+                String formattedDataType = dataType.replace(" ", "_").replace("-", "_").toUpperCase();
+                int count = getBySalesRepIdAndStatus(sales.getId(), formattedDataType).size();
+                salesRepReport.add(new ReportDTO(sales.getRepName(), Long.valueOf(count)));
             }
         }
         return salesRepReport;
     }
 
     public List<ReportDTO> reportByProduct(String dataType) {
-        List<SalesRep> salesReps = getAllSalesReps();
         List<ReportDTO> salesRepReport = new ArrayList<>();
         List<Truck> products = Truck.createProductList();
-        if (dataType.toUpperCase().equals("ALL")) {
+        if (dataType.equalsIgnoreCase("ALL")) {
             for (Truck product : products) {
-                salesRepReport.add(new ReportDTO(product.name(),countOppsByProduct(product.toString())));
+                salesRepReport.add(new ReportDTO(product.name(), countOppsByProduct(product.toString())));
             }
-        }
-        else if (dataType.toUpperCase().equals("CLOSED_WON") || dataType.toUpperCase().equals("CLOSED_LOST") ||
-        dataType.toUpperCase().equals("OPEN")) {
+        } else if ((dataType.replace("-", "_").replace(" ", "-").equalsIgnoreCase("CLOSED_WON")) ||
+                (dataType.replace("-", "_").replace(" ", "-").equalsIgnoreCase("CLOSED_LOST")) ||
+                dataType.equalsIgnoreCase("OPEN")) {
+            String formattedDataType = dataType.replace(" ", "_").replace("-", "_").toUpperCase();
             for (Truck product : products) {
-                salesRepReport.add(new ReportDTO(product.name(), countOppsByProductAndStatus(product.toString(),Status.valueOf(dataType))));
+                salesRepReport.add(new ReportDTO(product.name(), countOppsByProductAndStatus(product.toString(), Status.valueOf(formattedDataType))));
             }
         }
         return salesRepReport;
     }
 
     public List<ReportDTO> reportByCountry(String dataType) {
-        List<SalesRep> salesReps = getAllSalesReps();
         List<ReportDTO> salesRepReport = new ArrayList<>();
         List<Countries> countries = Countries.createCountryList();
-        if (dataType.toUpperCase().equals("ALL")) {
+        if (dataType.equalsIgnoreCase("ALL")) {
             for (Countries country : countries) {
                 salesRepReport.add(new ReportDTO(country.name(), countOppsByCountry(country.toString())));
             }
-        }
-        else if (dataType.toUpperCase().equals("CLOSED_WON") || dataType.toUpperCase().equals("CLOSED_LOST") ||
-                dataType.toUpperCase().equals("OPEN")) {
+        } else if ((dataType.replace("-", "_").replace(" ", "-").equalsIgnoreCase("CLOSED_WON")) ||
+                (dataType.replace("-", "_").replace(" ", "-").equalsIgnoreCase("CLOSED_LOST")) ||
+                dataType.equalsIgnoreCase("OPEN")) {
+            String formattedDataType = dataType.replace(" ", "_").replace("-", "_").toUpperCase();
             for (Countries country : countries) {
-                salesRepReport.add(new ReportDTO(country.name(), countOppsByCountryAndStatus(country.toString(),Status.valueOf(dataType))));
+                salesRepReport.add(new ReportDTO(country.name(), countOppsByCountryAndStatus(country.toString(), Status.valueOf(formattedDataType))));
             }
         }
-        return salesRepReport;
+        return salesRepReport.stream()
+                .sorted(Comparator.comparing(reportDTO -> reportDTO.getCount(), Comparator.reverseOrder()))
+                .collect(Collectors.toList());
+//        return salesRepReport;
     }
 
-//    public List<ReportDTO> reportByCity(String dataType) {
-//        List<String> cities = accountServiceProxy.getCityList();
-//        List<ReportDTO> salesRepReport = new ArrayList<>();
-//
-//    }
-
-    public List<ReportDTO> reportByIndustry(String dataType) {
-        List<SalesRep> salesReps = getAllSalesReps();
+    public List<ReportDTO> reportByCity(String dataType) {
+        List<String> cities = accountServiceProxy.getCityList();
         List<ReportDTO> salesRepReport = new ArrayList<>();
-        List<Industry> industries = Industry.createIndustryList();
-        if (dataType.toUpperCase().equals("ALL")) {
-            for (Industry industry : industries) {
-                salesRepReport.add(new ReportDTO(industry.name(), countOppsByIndustry(industry.toString())));
+        if (dataType.equalsIgnoreCase("ALL")) {
+            for (String city : cities) {
+                salesRepReport.add(new ReportDTO(city, countOppsByCity(city)));
+            }
+        } else if ((dataType.replace("-", "_").replace(" ", "-").equalsIgnoreCase("CLOSED_WON")) ||
+                (dataType.replace("-", "_").replace(" ", "-").equalsIgnoreCase("CLOSED_LOST")) ||
+                dataType.equalsIgnoreCase("OPEN")) {
+            String formattedDataType = dataType.replace(" ", "_").replace("-", "_").toUpperCase();
+            for (String city : cities) {
+                salesRepReport.add(new ReportDTO(city, countOppsByCityAndStatus(city, Status.valueOf(formattedDataType))));
             }
         }
-        else if (dataType.toUpperCase().equals("CLOSED_WON") || dataType.toUpperCase().equals("CLOSED_LOST") ||
-                dataType.toUpperCase().equals("OPEN")) {
+        return salesRepReport.stream()
+                .sorted(Comparator.comparing(reportDTO -> reportDTO.getCount(), Comparator.reverseOrder()))
+                .collect(Collectors.toList());
+//        return salesRepReport;
+    }
+
+    public List<ReportDTO> reportByIndustry(String dataType) {
+        List<ReportDTO> salesRepReport = new ArrayList<>();
+        List<Industry> industries = Industry.createIndustryList();
+        if (dataType.equalsIgnoreCase("ALL")) {
             for (Industry industry : industries) {
-                salesRepReport.add(new ReportDTO(industry.name(), countOppsByIndustryAndStatus(industry.toString(),Status.valueOf(dataType))));
+                salesRepReport.add(new ReportDTO(industry.toString(), countOppsByIndustry(industry.toString())));
+            }
+        } else if ((dataType.replace("-", "_").replace(" ", "-").equalsIgnoreCase("CLOSED_WON")) ||
+                (dataType.replace("-", "_").replace(" ", "-").equalsIgnoreCase("CLOSED_LOST")) ||
+                dataType.equalsIgnoreCase("OPEN")) {
+            String formattedDataType = dataType.replace(" ", "_").replace("-", "_").toUpperCase();
+            for (Industry industry : industries) {
+                salesRepReport.add(new ReportDTO(industry.name(), countOppsByIndustryAndStatus(industry.toString(), Status.valueOf(formattedDataType))));
             }
         }
         return salesRepReport;
@@ -128,13 +153,13 @@ public class ReportingServiceClass{
 
     public ReportDTO reportByEmployeeCount(String reportType) {
         ReportDTO report = null;
-        if (reportType.equals("MEDIAN")) {
+        if (reportType.equalsIgnoreCase("MEDIAN")) {
             report = new ReportDTO("Median Employee Count", findMedianEmployeeCount());
-        } else if (reportType.equals("MAX")) {
+        } else if (reportType.equalsIgnoreCase("MAX")) {
             report = new ReportDTO("Maximum Employee Count", findMaxEmployeeCount());
-        } else if (reportType.equals("MIN")) {
+        } else if (reportType.equalsIgnoreCase("MIN")) {
             report = new ReportDTO("Minimum Employee Count", findMinEmployeeCount());
-        } else if (reportType.equals("MEAN")) {
+        } else if (reportType.equalsIgnoreCase("MEAN")) {
             report = new ReportDTO("Mean Employee Count", findMeanEmployeeCount());
         }
         return report;
@@ -142,35 +167,36 @@ public class ReportingServiceClass{
 
     public ReportDTO reportByProductQuantity(String reportType) {
         ReportDTO report = null;
-        if (reportType.equals("MEDIAN")) {
+        if (reportType.equalsIgnoreCase("MEDIAN")) {
             report = new ReportDTO("Median Product Count", findMedianProductQuantity());
-        } else if (reportType.equals("MAX")) {
+        } else if (reportType.equalsIgnoreCase("MAX")) {
             report = new ReportDTO("Maximum Product Count", findMaxProductQuantity());
-        } else if (reportType.equals("MIN")) {
+        } else if (reportType.equalsIgnoreCase("MIN")) {
             report = new ReportDTO("Minimum Product Count", findMinProductQuantity());
-        } else if (reportType.equals("MEAN")) {
+        } else if (reportType.equalsIgnoreCase("MEAN")) {
             report = new ReportDTO("Mean Product Count", findMeanProductQuantity());
         }
         return report;
     }
 
+    // TODO - Fix this method. It is returning the ** product quantity by account instead of ** opportunities.
     public List<ReportDTO> reportOppsNumbersByAccount(String dataType) {
-        List<Account> accounts = getAllAccounts();
+        List<AccountDTO> accounts = getAllAccounts();
         List<ReportDTO> report = new ArrayList<>();
-        if (dataType.equals("MEDIAN")) {
-            for (Account account : accounts) {
+        if (dataType.equalsIgnoreCase("MEDIAN")) {
+            for (AccountDTO account : accounts) {
                 report.add(new ReportDTO("Median Opportunities By Account", findMedianOppsByAccount(account.getId())));
             }
-        } else if (dataType.equals("MAX")) {
-            for (Account account : accounts) {
+        } else if (dataType.equalsIgnoreCase("MAX")) {
+            for (AccountDTO account : accounts) {
                 report.add(new ReportDTO("Maximum Opportunities By Account", findMaxOppsByAccount(account.getId())));
             }
-        } else if (dataType.equals("MIN")) {
-            for (Account account : accounts) {
+        } else if (dataType.equalsIgnoreCase("MIN")) {
+            for (AccountDTO account : accounts) {
                 report.add(new ReportDTO("Minimum Opportunities By Account", findMinOppsByAccount(account.getId())));
             }
-        } else if (dataType.equals("MEAN")) {
-            for (Account account : accounts) {
+        } else if (dataType.equalsIgnoreCase("MEAN")) {
+            for (AccountDTO account : accounts) {
                 report.add(new ReportDTO("Mean Opportunities By Account", findMeanOppsByAccount(account.getId())));
             }
         }
@@ -178,7 +204,7 @@ public class ReportingServiceClass{
     }
 
 
-    public List<Account> getAllAccounts() {
+    public List<AccountDTO> getAllAccounts() {
         CircuitBreaker circuitBreaker = createCircuitBreaker();
         return circuitBreaker.run(() -> accountServiceProxy.findAll(),
                 throwable -> getAccountListFallback());
@@ -192,7 +218,7 @@ public class ReportingServiceClass{
 
     public Long countOppsByProductAndStatus(String product, Status status) {
         CircuitBreaker circuitBreaker = createCircuitBreaker();
-        return circuitBreaker.run(() -> opportunityServiceProxy.countOppsByProductAndStatus(product,status),
+        return circuitBreaker.run(() -> opportunityServiceProxy.countOppsByProductAndStatus(product, status),
                 throwable -> null);
     }
 
@@ -202,9 +228,22 @@ public class ReportingServiceClass{
                 throwable -> null);
     }
 
+
     public Long countOppsByCountryAndStatus(String country, Status status) {
         CircuitBreaker circuitBreaker = createCircuitBreaker();
-        return circuitBreaker.run(() -> opportunityServiceProxy.countOppsByCountryAndStatus(country,status),
+        return circuitBreaker.run(() -> opportunityServiceProxy.countOppsByCountryAndStatus(country, status),
+                throwable -> null);
+    }
+
+    public Long countOppsByCity(String city) {
+        CircuitBreaker circuitBreaker = createCircuitBreaker();
+        return circuitBreaker.run(() -> opportunityServiceProxy.countOppsByCity(city),
+                throwable -> null);
+    }
+
+    public Long countOppsByCityAndStatus(String city, Status status) {
+        CircuitBreaker circuitBreaker = createCircuitBreaker();
+        return circuitBreaker.run(() -> opportunityServiceProxy.countOppsByCityAndStatus(city, status),
                 throwable -> null);
     }
 
@@ -216,7 +255,7 @@ public class ReportingServiceClass{
 
     public Long countOppsByIndustryAndStatus(String industry, Status status) {
         CircuitBreaker circuitBreaker = createCircuitBreaker();
-        return circuitBreaker.run(() -> opportunityServiceProxy.countOppsByIndustryAndStatus(industry,status),
+        return circuitBreaker.run(() -> opportunityServiceProxy.countOppsByIndustryAndStatus(industry, status),
                 throwable -> null);
     }
 
@@ -232,9 +271,9 @@ public class ReportingServiceClass{
                 throwable -> getOppListFallback());
     }
 
-    public List<Opportunity> getBySalesRepIdAndStatus(Long id,String status) {
+    public List<Opportunity> getBySalesRepIdAndStatus(Long id, String status) {
         CircuitBreaker circuitBreaker = createCircuitBreaker();
-        return circuitBreaker.run(() -> opportunityServiceProxy.getBySalesRepIdAndStatus(id,status),
+        return circuitBreaker.run(() -> opportunityServiceProxy.getBySalesRepIdAndStatus(id, status),
                 throwable -> getOppListFallback());
     }
 
@@ -297,12 +336,14 @@ public class ReportingServiceClass{
         return circuitBreaker;
     }
 
-    public List<Account> getAccountListFallback() {
+    public List<AccountDTO> getAccountListFallback() {
         return null;
     }
+
     public List<Opportunity> getOppListFallback() {
         return null;
     }
+
     public List<SalesRep> getSalesRepListFallback() {
         return null;
     }
