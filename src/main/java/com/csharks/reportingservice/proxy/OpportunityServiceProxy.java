@@ -19,7 +19,7 @@ public interface OpportunityServiceProxy {
 
     @GetMapping("/all")
     @ResponseStatus(HttpStatus.OK)
-    public List<Opportunity> getAll();
+    List<Opportunity> getAll();
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
@@ -37,9 +37,9 @@ public interface OpportunityServiceProxy {
     public Opportunity createOpp(@RequestBody OpportunityDTO opportunityDTO);
 
     //Needs to be written into the service
-    @GetMapping("/sales-repAndStatus/{id}")
+    @GetMapping("/sales-repAndStatus/{id}/{status}")
     @ResponseStatus(HttpStatus.OK)
-    public List<Opportunity> getBySalesRepIdAndStatus(@PathVariable Long id,@RequestBody String status);
+    public List<Opportunity> getBySalesRepIdAndStatus(@PathVariable Long id,@PathVariable String status);
 
     @GetMapping("/product/{product}")
     public Long countOppsByProduct(@PathVariable(name = "product") String product);
