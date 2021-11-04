@@ -23,64 +23,64 @@ public interface OpportunityServiceProxy {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Optional<Opportunity> getById(@PathVariable Long id);
+    Optional<Opportunity> getById(@PathVariable Long id);
 
     @GetMapping("/sales-rep/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public List<Opportunity> getBySalesRepId(@PathVariable Long id);
+    List<Opportunity> getBySalesRepId(@PathVariable Long id);
 
     @PutMapping("/{id}/{status}")
-    public Opportunity changeStatus(@PathVariable Long id, @PathVariable String status);
+    Opportunity changeStatus(@PathVariable Long id, @PathVariable String status);
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
-    public Opportunity createOpp(@RequestBody OpportunityDTO opportunityDTO);
+    Opportunity createOpp(@RequestBody OpportunityDTO opportunityDTO);
 
     //Needs to be written into the service
     @GetMapping("/sales-repAndStatus/{id}/{status}")
     @ResponseStatus(HttpStatus.OK)
-    public List<Opportunity> getBySalesRepIdAndStatus(@PathVariable Long id,@PathVariable String status);
+    List<Opportunity> getBySalesRepIdAndStatus(@PathVariable Long id,@PathVariable String status);
 
     @GetMapping("/product/{product}")
-    public Long countOppsByProduct(@PathVariable(name = "product") String product);
+    Long countOppsByProduct(@PathVariable(name = "product") String product);
 
     @GetMapping("/product")
-    public Long countOppsByProductAndStatus(@RequestParam String product, @RequestParam Status status);
+    Long countOppsByProductAndStatus(@RequestParam String product, @RequestParam Status status);
 
     @GetMapping("/location/country/{country}")
-    public Long countOppsByCountry(@PathVariable(name = "country") String country);
+    Long countOppsByCountry(@PathVariable(name = "country") String country);
 
     @GetMapping("/location/country")
-    public Long countOppsByCountryAndStatus(@RequestParam String country, @RequestParam Status status);
+    Long countOppsByCountryAndStatus(@RequestParam String country, @RequestParam Status status);
 
     @GetMapping("/industry/{industry}")
-    public Long countOppsByIndustry(@PathVariable(name = "industry") String industry);
+    Long countOppsByIndustry(@PathVariable(name = "industry") String industry);
 
     @GetMapping("/industry")
-    public Long countOppsByIndustryAndStatus(@RequestParam String industry, @RequestParam Status status);
+    Long countOppsByIndustryAndStatus(@RequestParam String industry, @RequestParam Status status);
 
     @GetMapping("/product/mean")
-    public Double findMeanProductQuantity();
+    Double findMeanProductQuantity();
 
     @GetMapping("/product/max")
-    public Long findMaxProductQuantity();
+    Long findMaxProductQuantity();
 
     @GetMapping("/product/min")
-    public Long findMinProductQuantity();
+    Long findMinProductQuantity();
 
     @GetMapping("/product/median")
-    public Long findMedianProductQuantity();
+    Long findMedianProductQuantity();
 
     @GetMapping("/mean/{accountId}")
-    public Double findMeanOppsByAccount(@PathVariable(name = "accountId") Long id);
+    Double findMeanOppsByAccount(@PathVariable(name = "accountId") Long id);
 
     @GetMapping("/max/{accountId}")
-    public Long findMaxOppsByAccount(@PathVariable(name = "accountId") Long id);
+    Long findMaxOppsByAccount(@PathVariable(name = "accountId") Long id);
 
     @GetMapping("/min/{accountId}")
-    public Long findMinOppsByAccount(@PathVariable(name = "accountId") Long id);
+    Long findMinOppsByAccount(@PathVariable(name = "accountId") Long id);
 
     @GetMapping("/median/{accountId}")
-    public Long findMedianOppsByAccount(@PathVariable(name = "accountId") Long id);
+    Long findMedianOppsByAccount(@PathVariable(name = "accountId") Long id);
 
 }
