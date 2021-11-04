@@ -54,21 +54,20 @@ public class ReportingServiceClass {
                         leadCount.getSalesRepId().toString();
                 salesRepReport.add(new ReportDTO(salesRepNameByLeadCountId, leadCount.getLeadCount()));
             }
-
-        } else if (dataType.equalsIgnoreCase("OPPORTUNITY")) {
+        }
+        else if (dataType.equalsIgnoreCase("OPPORTUNITY")) {
             for (SalesRep sales : salesReps) {
                 int count = getBySalesRepId(sales.getId()).size();
                 ReportDTO newReport = new ReportDTO(sales.getRepName(), Long.valueOf(count));
                 salesRepReport.add(newReport);
             }
-
-        } else if ((dataType.replace("_", "-").replace(" ", "-").equalsIgnoreCase("CLOSED-WON")) ||
-                (dataType.replace("_", "-").replace(" ", "-").equalsIgnoreCase("CLOSED-LOST"))) {
+        }
+        else if ((dataType.replace("-", "_").replace(" ", "-").equalsIgnoreCase("CLOSED_WON")) ||
+                (dataType.replace("-", "_").replace(" ", "-").equalsIgnoreCase("CLOSED_LOST"))) {
             for (SalesRep sales : salesReps) {
                 String formattedDataType = dataType.replace(" ", "_").replace("-", "_").toUpperCase();
                 int count = getBySalesRepIdAndStatus(sales.getId(), formattedDataType).size();
-                ReportDTO newReport = new ReportDTO(sales.getRepName(), Long.valueOf(count));
-                salesRepReport.add(newReport);
+                salesRepReport.add(new ReportDTO(sales.getRepName(), Long.valueOf(count)));
             }
         }
         return salesRepReport;
@@ -78,14 +77,16 @@ public class ReportingServiceClass {
         List<SalesRep> salesReps = getAllSalesReps();
         List<ReportDTO> salesRepReport = new ArrayList<>();
         List<Truck> products = Truck.createProductList();
-        if (dataType.toUpperCase().equals("ALL")) {
+        if (dataType.equalsIgnoreCase("ALL")) {
             for (Truck product : products) {
                 salesRepReport.add(new ReportDTO(product.name(), countOppsByProduct(product.toString())));
             }
-        } else if (dataType.toUpperCase().equals("CLOSED_WON") || dataType.toUpperCase().equals("CLOSED_LOST") ||
-                dataType.toUpperCase().equals("OPEN")) {
+        } else if ((dataType.replace("-", "_").replace(" ", "-").equalsIgnoreCase("CLOSED_WON")) ||
+                (dataType.replace("-", "_").replace(" ", "-").equalsIgnoreCase("CLOSED_LOST")) ||
+                dataType.equalsIgnoreCase("OPEN")) {
+            String formattedDataType = dataType.replace(" ", "_").replace("-", "_").toUpperCase();
             for (Truck product : products) {
-                salesRepReport.add(new ReportDTO(product.name(), countOppsByProductAndStatus(product.toString(), Status.valueOf(dataType))));
+                salesRepReport.add(new ReportDTO(product.name(), countOppsByProductAndStatus(product.toString(), Status.valueOf(formattedDataType))));
             }
         }
         return salesRepReport;
