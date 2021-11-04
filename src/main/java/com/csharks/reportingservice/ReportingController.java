@@ -28,6 +28,11 @@ public class ReportingController {
         return reportingServiceClass.reportByCountry(dataType);
     }
 
+    @GetMapping("/report/byCity/{dataType}")
+    public List<ReportDTO> reportByCity(@PathVariable(name = "dataType") String dataType) {
+        return reportingServiceClass.reportByCity(dataType);
+    }
+
     @GetMapping("/report/byIndustry/{dataType}")
     public List<ReportDTO> reportByIndustry(@PathVariable(name = "dataType") String dataType) {
         return reportingServiceClass.reportByIndustry(dataType);

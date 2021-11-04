@@ -53,6 +53,12 @@ public interface OpportunityServiceProxy {
     @GetMapping("/location/country")
     Long countOppsByCountryAndStatus(@RequestParam String country, @RequestParam Status status);
 
+    @GetMapping("/location/city/{city}")
+    Long countOppsByCity(@PathVariable(name = "city") String city);
+
+    @GetMapping("/location/city")
+    Long countOppsByCityAndStatus(@RequestParam String city, @RequestParam Status status);
+
     @GetMapping("/industry/{industry}")
     Long countOppsByIndustry(@PathVariable(name = "industry") String industry);
 

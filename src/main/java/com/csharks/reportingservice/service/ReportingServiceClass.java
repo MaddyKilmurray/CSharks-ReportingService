@@ -112,11 +112,27 @@ public class ReportingServiceClass {
 //        return salesRepReport;
     }
 
-//    public List<ReportDTO> reportByCity(String dataType) {
-//        List<String> cities = accountServiceProxy.getCityList();
-//        List<ReportDTO> salesRepReport = new ArrayList<>();
-//
-//    }
+    public List<ReportDTO> reportByCity(String dataType) {
+        List<String> cities = accountServiceProxy.getCityList();
+        List<ReportDTO> salesRepReport = new ArrayList<>();
+        List<Countries> countries = Countries.createCountryList();
+        if (dataType.equalsIgnoreCase("ALL")) {
+            for (String city : cities) {
+                salesRepReport.add(new ReportDTO(city, countOppsByCity(city)));
+            }
+        } else if ((dataType.replace("-", "_").replace(" ", "-").equalsIgnoreCase("CLOSED_WON")) ||
+                (dataType.replace("-", "_").replace(" ", "-").equalsIgnoreCase("CLOSED_LOST")) ||
+                dataType.equalsIgnoreCase("OPEN")) {
+            String formattedDataType = dataType.replace(" ", "_").replace("-", "_").toUpperCase();
+            for (String city : cities) {
+                salesRepReport.add(new ReportDTO(city, countOppsByCityAndStatus(city, Status.valueOf(formattedDataType))));
+            }
+        }
+        return salesRepReport.stream()
+                .sorted(Comparator.comparing(reportDTO -> reportDTO.getCount(), Comparator.reverseOrder()))
+                .collect(Collectors.toList());
+//        return salesRepReport;
+    }
 
     public List<ReportDTO> reportByIndustry(String dataType) {
         List<SalesRep> salesReps = getAllSalesReps();
@@ -211,9 +227,22 @@ public class ReportingServiceClass {
                 throwable -> null);
     }
 
+
     public Long countOppsByCountryAndStatus(String country, Status status) {
         CircuitBreaker circuitBreaker = createCircuitBreaker();
         return circuitBreaker.run(() -> opportunityServiceProxy.countOppsByCountryAndStatus(country, status),
+                throwable -> null);
+    }
+
+    public Long countOppsByCity(String city) {
+        CircuitBreaker circuitBreaker = createCircuitBreaker();
+        return circuitBreaker.run(() -> opportunityServiceProxy.countOppsByCity(city),
+                throwable -> null);
+    }
+
+    public Long countOppsByCityAndStatus(String city, Status status) {
+        CircuitBreaker circuitBreaker = createCircuitBreaker();
+        return circuitBreaker.run(() -> opportunityServiceProxy.countOppsByCityAndStatus(city, status),
                 throwable -> null);
     }
 
