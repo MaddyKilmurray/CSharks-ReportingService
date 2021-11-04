@@ -48,9 +48,11 @@ public class ReportingServiceClass {
         if (dataType.equalsIgnoreCase("LEAD")) {
             List<LeadCountBySalesRepDTO> leads = getCountLeadsBySalesRepId();
             for (LeadCountBySalesRepDTO leadCount : leads) {
+
                 Optional<SalesRep> salesRepByLeadCountId = salesReps.stream()
                         .filter(salesRep -> salesRep.getId().equals(leadCount.getSalesRepId()))
                         .findFirst();
+
                 String salesRepNameByLeadCountId = salesRepByLeadCountId.isPresent() ?
                         salesRepByLeadCountId.get().getRepName() :
                         leadCount.getSalesRepId().toString();
@@ -180,29 +182,78 @@ public class ReportingServiceClass {
     }
 
     // TODO - Fix this method. It is returning the ** product quantity by account instead of ** opportunities.
-    public List<ReportDTO> reportOppsNumbersByAccount(String dataType) {
+    public ReportDTO reportOppsNumbersByAccount(String dataType) {
         List<AccountDTO> accounts = getAllAccounts();
-        List<ReportDTO> report = new ArrayList<>();
+        ReportDTO report = null;
+        List<Long> nrOfOpportunities = new ArrayList<>();
+        List<Opportunity> opportunities = getAllOpportunities();
+
+        for (AccountDTO account : accounts) {
+            nrOfOpportunities.add(
+                    opportunities.stream()
+                            .filter(opportunity -> opportunity.getAccountId().equals(account.getId()))
+                            .count());
+        }
+
+
         if (dataType.equalsIgnoreCase("MEDIAN")) {
-            for (AccountDTO account : accounts) {
-                report.add(new ReportDTO("Median Opportunities By Account", findMedianOppsByAccount(account.getId())));
-            }
+            report = new ReportDTO("Median Opportunities By Account", median(nrOfOpportunities));
         } else if (dataType.equalsIgnoreCase("MAX")) {
-            for (AccountDTO account : accounts) {
-                report.add(new ReportDTO("Maximum Opportunities By Account", findMaxOppsByAccount(account.getId())));
-            }
+            report = new ReportDTO("Maximum Opportunities By Account", max(nrOfOpportunities));
         } else if (dataType.equalsIgnoreCase("MIN")) {
-            for (AccountDTO account : accounts) {
-                report.add(new ReportDTO("Minimum Opportunities By Account", findMinOppsByAccount(account.getId())));
-            }
+            report = new ReportDTO("Minimum Opportunities By Account", min(nrOfOpportunities));
         } else if (dataType.equalsIgnoreCase("MEAN")) {
-            for (AccountDTO account : accounts) {
-                report.add(new ReportDTO("Mean Opportunities By Account", findMeanOppsByAccount(account.getId())));
-            }
+            report = new ReportDTO("Mean Opportunities By Account", mean(nrOfOpportunities));
         }
         return report;
     }
 
+    public double mean(List<Long> listOfNumbers) {
+        double sum = 0;
+        for (Long number : listOfNumbers) {
+            sum += number;
+        }
+        return sum / listOfNumbers.size();
+    }
+
+    public long max(List<Long> listOfNumbers) {
+        long max = 0;
+        for (Long number : listOfNumbers) {
+            if (number > max) {
+                max = number;
+            }
+        }
+        return max;
+    }
+
+
+    public long min(List<Long> listOfNumbers) {
+        long min = Long.MAX_VALUE;
+        for (Long number : listOfNumbers) {
+            if (number < min) {
+                min = number;
+            }
+        }
+        return min;
+    }
+
+    public long median(List<Long> listOfNumbers) {
+        long median = 0;
+        long size = listOfNumbers.size();
+        if (size % 2 == 0) {
+            median = (listOfNumbers.get((int) (size / 2)) + listOfNumbers.get((int) (size / 2 - 1))) / 2;
+        } else {
+            median = listOfNumbers.get((int) (size / 2));
+        }
+        return median;
+    }
+
+
+    public List<Opportunity> getAllOpportunities() {
+        CircuitBreaker circuitBreaker = createCircuitBreaker();
+        return circuitBreaker.run(() -> opportunityServiceProxy.getAll(),
+                throwable -> getOppListFallback());
+    }
 
     public List<AccountDTO> getAllAccounts() {
         CircuitBreaker circuitBreaker = createCircuitBreaker();

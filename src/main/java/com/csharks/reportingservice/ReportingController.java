@@ -49,7 +49,7 @@ public class ReportingController {
     }
 
     @GetMapping("/report/oppsByAccount/{dataType}")
-    public List<ReportDTO> reportOppsByAccount(@PathVariable(name = "dataType") String dataType) {
+    public ReportDTO reportOppsByAccount(@PathVariable(name = "dataType") String dataType) {
         return reportingServiceClass.reportOppsNumbersByAccount(dataType);
     }
 
